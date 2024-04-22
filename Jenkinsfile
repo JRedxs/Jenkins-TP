@@ -7,11 +7,10 @@ pipeline {
         }
         stage('Install dependencies'){
             steps{
-                withNPM(npmrcConfig:'my-custom-npmrc') {
+                configFileProvider([configFile(fileId: '.npmrc', variable: 'NPM_CONFIG_FILE')]) {
                     sh 'npm install'
                 }
             }
-        }
         stage('Build') {
             steps {
                 echo 'No build for this project'
