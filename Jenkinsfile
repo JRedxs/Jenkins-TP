@@ -3,10 +3,6 @@ pipeline {
     tools { 
         nodejs 'Node'
     }
-    environment {
-        DOCKER_IMAGE = 'accounting:latest'
-        DOCKER_CONTAINER = 'accounting-node'  
-    }
     stages {
         stage('Checkout') {
             steps {
@@ -16,9 +12,7 @@ pipeline {
         stage('Install dependencies') {
             steps {
                 script {
-                    docker.image('node:20-alpine').inside {
-                        sh 'npm install'
-                    }
+                    sh 'npm install'
                 }
             }
         }
@@ -30,26 +24,25 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    docker.image('node:20-alpine').inside {
-                        sh 'npm test'
-                    }
+                    sh 'npm test'
                 }
             }
         }
         stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build(env.DOCKER_IMAGE, '.')
+            agent {
+                dockerfile {
+                    filename 'Dockerfile'
+                    dir 'build'
+                    label 'my-defined-label'
+                    additionalBuildArgs '--build-arg version=1.0.2'
+                    args '-v /tmp:/tmp'
                 }
             }
-        }
-        stage('Run Docker Container') {
             steps {
-                script {
-                    docker.run("-d --name ${env.DOCKER_CONTAINER} -p 3000:3000 ${env.DOCKER_IMAGE}")
-                }
+                echo 'Docker good'
             }
         }
+
         stage('Deploy') {
             steps {
                 echo 'Deploying in GCAR'
