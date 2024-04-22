@@ -1,14 +1,11 @@
 pipeline {
-    agent {
-        label 'docker'
-    }
+    agent any
     tools { 
-        nodejs 'Node',
-        dockerTool 'docker'
+        nodejs 'Node'
     }
     environment {
-        DOCKER_IMAGE = 'my-node-app:latest'
-
+        DOCKER_IMAGE = 'accounting:latest'
+        DOCKER_CONTAINER = 'accounting-node'  
     }
     stages {
         stage('Checkout') {
@@ -18,7 +15,9 @@ pipeline {
         }
         stage('Install dependencies') {
             steps {
-                sh 'npm install'
+                docker.image('node:20-alpine').inside {
+                        sh 'npm install'
+                    }
             }
         }
         stage('Build') {
@@ -28,21 +27,21 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh 'npm run test'
-            }
+                    docker.image('node:20-alpine').inside {
+                        sh 'npm test'
+                }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build(env.DOCKER_IMAGE, '.')
+                    docker.build("$DOCKER_IMAGE", '.')
                 }
             }         
         }
         stage('Run Docker Container'){
             steps {
                 script {
-                    docker.run("--rm ${env.DOCKER_IMAGE}")
-                }
+                    docker.run("-d --name $DOCKER_CONTAINER -p 3000:3000 $DOCKER_IMAGE")                }
             }
         }
         stage('Deploy') {
