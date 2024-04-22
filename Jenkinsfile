@@ -9,8 +9,7 @@ pipeline {
         IMAGE_TAG = 'latest'
         REGION = 'europe-west1'
         REPOSITORY = 'repo-jenkins'
-        IMAGE_URI = 'europe-west1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}'
-        CREDENTIALS_ID = 'credentials.json'
+        IMAGE_URI = "europe-west1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
     }
     stages {
         stage('Checkout') {
@@ -21,8 +20,8 @@ pipeline {
         stage('Auth with GCP') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: CREDENTIALS_ID, variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                        sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
+                    withCredentials([file(credentialsId: 'your-credentials-id', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                        sh "gcloud auth activate-service-account --key-file=\${GOOGLE_APPLICATION_CREDENTIALS}"
                     }
                 }
             }
@@ -42,18 +41,17 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                        sh 'npm test'
+                    sh 'npm test'
                 }
             }
         }
         stage('Build Docker Image') {
             steps {
-                script{
-                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}", '.')       
-                    }
+                script {
+                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}", '.')
+                }
             }
         }
-
         stage('Push to Google Artifact Registry') {
             steps {
                 script {
