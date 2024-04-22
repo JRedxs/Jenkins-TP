@@ -5,7 +5,6 @@ pipeline {
     }
     environment {
         DOCKER_IMAGE = 'accounting:latest'
-        DOCKER_CONTAINER = 'app-accounting'
     }
     stages {
         stage('Checkout') {
@@ -28,16 +27,14 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    docker.image(env.DOCKER_IMAGE).inside {
                         sh 'npm test'
-                    }
                 }
             }
         }
         stage('Build Docker Image') {
             steps {
                 script{
-                    docker.build(env.DOCKER_IMAGE)
+                    docker.build(DOCKER_IMAGE, '.')
                 }
             }
         }
