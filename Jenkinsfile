@@ -15,9 +15,11 @@ pipeline {
         }
         stage('Install dependencies') {
             steps {
-                docker.image('node:20-alpine').inside {
+                script {
+                    docker.image('node:20-alpine').inside {
                         sh 'npm install'
                     }
+                }
             }
         }
         stage('Build') {
@@ -27,21 +29,25 @@ pipeline {
         }
         stage('Test') {
             steps {
+                script {
                     docker.image('node:20-alpine').inside {
                         sh 'npm test'
+                    }
                 }
+            }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("$DOCKER_IMAGE", '.')
+                    docker.build(env.DOCKER_IMAGE, '.')
                 }
-            }         
+            }
         }
-        stage('Run Docker Container'){
+        stage('Run Docker Container') {
             steps {
                 script {
-                    docker.run("-d --name $DOCKER_CONTAINER -p 3000:3000 $DOCKER_IMAGE")                }
+                    docker.run("-d --name ${env.DOCKER_CONTAINER} -p 3000:3000 ${env.DOCKER_IMAGE}")
+                }
             }
         }
         stage('Deploy') {
@@ -50,5 +56,4 @@ pipeline {
             }
         }
     }
-}
 }
