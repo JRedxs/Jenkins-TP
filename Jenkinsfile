@@ -4,12 +4,27 @@ pipeline {
         nodejs 'Node'
     }
     environment {
-        DOCKER_IMAGE = 'accounting:latest'
+        IMAGE_NAME = 'accounting'
+        PROJECT_ID = 'useful-temple-417615'
+        IMAGE_TAG = 'latest'
+        REGION = 'europe-west1'
+        REPOSITORY = 'repo-jenkins'
+        IMAGE_URI = 'europe-west1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}'
+        CREDENTIALS_ID = 'credentials.json'
     }
     stages {
         stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: '*/develop']], userRemoteConfigs: [[url: 'https://github.com/JRedxs/Jenkins-TP.git']]])
+            }
+        }
+        stage('Auth with GCP') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: CREDENTIALS_ID, variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                        sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
+                    }
+                }
             }
         }
         stage('Install dependencies') {
@@ -34,14 +49,19 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script{
-                    docker.build(DOCKER_IMAGE, '.')
-                }
+                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}", '.')       
+                    }
             }
         }
 
-        stage('Deploy') {
+        stage('Push to Google Artifact Registry') {
             steps {
-                echo 'Deploying in GCAR'
+                script {
+                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_URI}"
+                    sh "gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet"
+                    sh "docker push ${IMAGE_URI}"
+                    echo 'Deploy is done!'
+                }
             }
         }
     }
