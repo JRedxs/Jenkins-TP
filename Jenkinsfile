@@ -23,6 +23,20 @@ pipeline {
                 sh (script: 'npm run test')
             }
         }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build('node:20-alpine', '.')
+                }
+            }         
+        }
+        stage('Run Docker Container'){
+            steps{
+                script {
+                    docker.run("--rm node:20-alpine")
+                }
+            }
+        }
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
