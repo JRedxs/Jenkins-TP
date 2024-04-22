@@ -1,7 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        dockerfile true
+    }
     tools { 
-        nodejs 'Node'
+        nodejs 'Node',
+        'org.jenkinsci.plugins.docker.commons.tools.DockerTool' 'docker'
     }
     environment {
         DOCKER_IMAGE = 'my-node-app:latest'
