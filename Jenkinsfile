@@ -3,6 +3,10 @@ pipeline {
     tools { 
         nodejs 'Node'
     }
+    environment {
+        DOCKER_IMAGE = 'accounting:latest'
+        DOCKER_CONTAINER = 'app-accounting'
+    }
     stages {
         stage('Checkout') {
             steps {
@@ -24,18 +28,17 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    sh 'npm test'
+                    docker.image(env.DOCKER_IMAGE).inside {
+                        sh 'npm test'
+                    }
                 }
             }
         }
         stage('Build Docker Image') {
-            agent {
-                docker {
-                    image 'node:20-alpine'
-                }
-            }
             steps {
-                sh 'node --version'
+                script{
+                    docker.build(env.DOCKER_IMAGE)
+                }
             }
         }
 
