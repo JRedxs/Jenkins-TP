@@ -5,7 +5,7 @@ pipeline {
     }
     environment {
         DOCKER_IMAGE = 'my-node-app:latest'
-        
+
     }
     stages {
         stage('Checkout') {
@@ -44,7 +44,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                echo 'Deploying....'
+                echo 'Deploying in GCAR'
             }
         }
     }
