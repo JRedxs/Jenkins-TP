@@ -7,7 +7,9 @@ pipeline {
         }
         stage('Install dependencies'){
             steps{
-                sh (script: 'npm install')
+                withNPM(npmrcConfig:'my-custom-npmrc') {
+                    sh 'npm install'
+                }
             }
         }
         stage('Build') {
