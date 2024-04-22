@@ -11,6 +11,7 @@ pipeline {
                     sh 'npm install'
                 }
             }
+            }
         stage('Build') {
             steps {
                 echo 'No build for this project'
