@@ -3,10 +3,14 @@ pipeline {
     tools { 
         nodejs 'Node'
     }
+    environment {
+        DOCKER_IMAGE = 'my-node-app:latest'
+    }
     stages {
         stage('Checkout') {
             steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/develop']], userRemoteConfigs: [[url: 'https://github.com/JRedxs/Jenkins-TP.git']]])            }
+                checkout([$class: 'GitSCM', branches: [[name: '*/develop']], userRemoteConfigs: [[url: 'https://github.com/JRedxs/Jenkins-TP.git']]])
+            }
         }
         stage('Install dependencies') {
             steps {
@@ -20,20 +24,20 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh (script: 'npm run test')
+                sh 'npm run test'
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build('node:20-alpine', '.')
+                    docker.build(env.DOCKER_IMAGE, '.')
                 }
             }         
         }
         stage('Run Docker Container'){
-            steps{
+            steps {
                 script {
-                    docker.run("--rm node:20-alpine")
+                    docker.run("--rm ${env.DOCKER_IMAGE}")
                 }
             }
         }
