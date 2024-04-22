@@ -20,7 +20,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh (script: 'node ./tests/accounting.js')
+                sh (script: 'jest ./tests/accounting.js')
             }
         }
         stage('Deploy') {
