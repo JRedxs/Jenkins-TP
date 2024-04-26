@@ -10,6 +10,7 @@ pipeline {
         REGION = 'europe-west1'
         REPOSITORY = 'repo-jenkins'
         IMAGE_URI = "europe-west1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
+        
     }
     stages {
         stage('Checkout') {
@@ -20,7 +21,7 @@ pipeline {
         stage('Auth with GCP') {
             steps {
                 script {
-                        sh "gcloud auth activate-service-account --key-file=credentials.json"
+                        sh "gcloud auth activate-service-account --key-file=credentials.json"  
                 }
             }
         }
